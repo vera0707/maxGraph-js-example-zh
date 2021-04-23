@@ -1,0 +1,131 @@
+<html>
+<head>
+	<!-- maxGraph锚点连接案例 -->
+	<title>Anchors example for mxGraph</title>
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
+	<script type="text/javascript">
+		
+		mxBasePath = '../src';
+	</script>
+
+	<!-- 加载核心主文件 -->
+	<script type="text/javascript" src="../src/js/mxClient.js"></script>
+
+	<!-- 示例代码 -->
+	<script type="text/javascript">
+	
+		// 复写图形预制的连接锚点
+		// views - myGraph
+		mxGraph.prototype.getAllConnectionConstraints = function(terminal, source)
+		{
+			if (terminal != null && terminal.shape != null)
+			{
+				if (terminal.shape.stencil != null)
+				{
+					if (terminal.shape.stencil.constraints != null)
+					{
+						return terminal.shape.stencil.constraints;
+					}
+				}
+				else if (terminal.shape.constraints != null)
+				{
+					return terminal.shape.constraints;
+				}
+			}
+	
+			return null;
+		};
+	
+		// 定义图形的连接点位置
+		// views - myShape
+		// 区间范围 [0-1]
+		// x向右为正 y向下为正
+		mxShape.prototype.constraints = [
+			new mxConnectionConstraint(new mxPoint(0.25, 0), true),
+										 new mxConnectionConstraint(new mxPoint(0.5, 0), true),
+										 new mxConnectionConstraint(new mxPoint(0.75, 0), true),
+		        	      //         		 new mxConnectionConstraint(new mxPoint(0, 0.25), true),
+		        	      //         		 new mxConnectionConstraint(new mxPoint(0, 0.5), true),
+		        	      //         		 new mxConnectionConstraint(new mxPoint(0, 0.75), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(1, 0.25), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(1, 0.5), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(1, 0.75), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(0.25, 1), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(0.5, 1), true),
+		        	      //       		 new mxConnectionConstraint(new mxPoint(0.75, 1), true)
+		];
+		
+		// 去除边缘连接点
+		// shape - myPolyine
+		mxPolyline.prototype.constraints = null;
+
+		// Program starts here. Creates a sample graph in the
+		// DOM node with the specified ID. This function is invoked
+		// from the onLoad event handler of the document (see below).
+		// 起使程序
+		// container - 结点DOM
+		// container结点加载完毕后执行该方法
+		function main(container)
+		{
+			// 简单浏览器是否支持改程序
+			if (!mxClient.isBrowserSupported())
+			{
+				// 显示错误信息 浏览器不支持
+				// util - myUtil
+				mxUtils.error('Browser is not supported!', 200, false);
+			}
+			else
+			{
+				// containerDOM内禁止调出右键菜单
+				mxEvent.disableContextMenu(container);
+
+				// 在容器内新建图层
+				var graph = new mxGraph(container);
+				// 设置图是否允许建立新连接(是否允许用户建立连接线)
+				graph.setConnectable(true);
+				
+				// 图形边缘连接预览效果
+				graph.connectionHandler.createEdgeState = function(me)
+				{
+					var edge = graph.createEdge(null, null, null, null, null);
+					
+					return new mxCellState(this.graph.view, edge, this.graph.getCellStyle(edge));
+				};
+				
+				// Specifies the default edge style
+				graph.getStylesheet().getDefaultEdgeStyle()['edgeStyle'] = 'orthogonalEdgeStyle';
+				
+				// Enables rubberband selection
+				new mxRubberband(graph);
+				
+				// Gets the default parent for inserting new cells. This
+				// is normally the first child of the root (ie. layer 0).
+				var parent = graph.getDefaultParent();
+								
+				// Adds cells to the model in a single step
+				graph.getModel().beginUpdate();
+				try
+				{
+					var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
+					var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
+					var e1 = graph.insertEdge(parent, null, '', v1, v2);
+				}
+				finally
+				{
+					// Updates the display
+					graph.getModel().endUpdate();
+				}
+			}
+		};
+	</script>
+</head>
+
+<!-- Page passes the container for the graph to the program -->
+<body onload="main(document.getElementById('graphContainer'))">
+
+	<!-- Creates a container for the graph with a grid wallpaper -->
+	<div id="graphContainer"
+		style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
+	</div>
+</body>
+</html>
