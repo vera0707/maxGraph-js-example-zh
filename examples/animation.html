@@ -1,22 +1,27 @@
-<!--
-  Copyright (c) 2006-2017, JGraph Ltd
-  
-  Animation example for mxGraph. This example demonstrates using
-  SVG animations on edges to visualize the flow in a pipe.
--->
 <html>
 <head>
+	<!-- mxGraph - SVG动画 -->
 	<title>Animation example for mxGraph</title>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
+	<!-- 加载核心主文件 -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
+	<!-- 动画效果 -->
 	<style type="text/css">
+		#graphContainer{
+			position:relative;
+			overflow:hidden;
+			width:321px;
+			height:241px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+			margin: 0 auto;
+		}
 		.flow {
 		  stroke-dasharray: 8;
 		  animation: dash 0.5s linear;
@@ -29,14 +34,17 @@
 		}
 	</style>
 	
-	<!-- Example code -->
+	<!-- 示例代码 -->
 	<script type="text/javascript">
 		function main(container)
 		{
 			var graph = new mxGraph(container);
+			// 禁用光标
 			graph.setEnabled(false);
+			// 获取默认父结点（第0层）
 			var parent = graph.getDefaultParent();
 
+			// 插入自定义形状  可以将vertexStyle理解为纹理样式
 			var vertexStyle = 'shape=cylinder;strokeWidth=2;fillColor=#ffffff;strokeColor=black;' +
 				'gradientColor=#a0a0a0;fontColor=black;fontStyle=1;spacingTop=14;';
 			
@@ -45,9 +53,14 @@
 			{
 				var v1 = graph.insertVertex(parent, null, 'Pump', 20, 20, 60, 60,vertexStyle);
 				var v2 = graph.insertVertex(parent, null, 'Tank', 200, 150, 60, 60,vertexStyle);
+				// 设置连接样式
 				var e1 = graph.insertEdge(parent, null, '', v1, v2,
 					'strokeWidth=3;endArrow=block;endSize=2;endFill=1;strokeColor=black;rounded=1;');
+				// 设置e1经过的点坐标 将会顺序连接
 				e1.geometry.points = [new mxPoint(230, 50)];
+				// 移动图层位置 
+				// Parameters: back(下移) cells(移动的图层) 
+				// views - myGraph
 				graph.orderCells(true, [e1]);
 			}
 			finally
@@ -56,7 +69,11 @@
 				graph.getModel().endUpdate();
 			}
 
-			// Adds animation to edge shape and makes "pipe" visible
+			// 添加动画 获取连接线el
+			// 连接线e1共生产3个path路径
+			// 第一个ptah显示最外层 类似于『管道』 默认不可见
+			// 第二个path显示连接线 类似于『管道』内的水
+			// 第三个path显示target端连接箭头
 			var state = graph.view.getState(e1);
 			state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
 			state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '6');
@@ -66,12 +83,14 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+<body>
+	<!-- 图形容器 -->
+	<div id="graphContainer"></div>
 
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+	<script>
+		window.onload = function(){
+			main(document.getElementById('graphContainer'))
+		}
+	</script>
 </body>
 </html>
