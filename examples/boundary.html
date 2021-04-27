@@ -1,56 +1,69 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Boundary example for mxGraph. This example demonstrates
-  implementing boundary events in BPMN diagrams.
--->
+
 <html>
 <head>
+	<!-- maxGraph - 图的相对子元素 -->
 	<title>Boundary example for mxGraph</title>
+	<style>
+		#graphContainer{
+			position:relative;
+			overflow:hidden;
+			width:321px;
+			height:241px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+			margin: 50px auto;
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
+	<!-- 加载核心主文件 -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
+	<!-- 示例代码 -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
+	
 		function main(container)
 		{
-			// Checks if the browser is supported
+      // 检查浏览器是否支持
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is not supported.
+				// 浏览器不支持时页面提醒
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Disables the built-in context menu
+        // 禁止右键菜单
 				mxEvent.disableContextMenu(container);
 				
-				// Creates the graph inside the given container
+        // 在容器内新建图层
 				var graph = new mxGraph(container);
 				
-				// Sets the base style for all vertices
+				// 获取边样式
 				var style = graph.getStylesheet().getDefaultVertexStyle();
+				// 设置圆角
 				style[mxConstants.STYLE_ROUNDED] = true;
-				style[mxConstants.STYLE_FILLCOLOR] = '#ffffff';
-				style[mxConstants.STYLE_STROKECOLOR] = '#000000';
+				// 设置背景色
+				style[mxConstants.STYLE_FILLCOLOR] = '#fff';
+				// 设置线条颜色
+				style[mxConstants.STYLE_STROKECOLOR] = '#000';
+				// 设置线条宽度
 				style[mxConstants.STYLE_STROKEWIDTH] = '2';
+				// 设置文字颜色
 				style[mxConstants.STYLE_FONTCOLOR] = '#000000';
+				// 设置文字字号
 				style[mxConstants.STYLE_FONTSIZE] = '12';
+				// 设置文字字体
 				style[mxConstants.STYLE_FONTSTYLE] = 1;
+				// 将新样式更新
 				graph.getStylesheet().putDefaultVertexStyle(style);
 				
-				// Removes folding icon for relative children
-				graph.isCellFoldable = function(cell, collapse)
-				{
+				// 当图中有相对子元素时，是否显示折叠图标
+				// 默认会有一个折叠图标 可以隐藏/显示相对元素
+				graph.isCellFoldable = function(cell, collapse){
 					var childCount = this.model.getChildCount(cell);
 					
 					for (var i = 0; i < childCount; i++)
@@ -67,8 +80,9 @@
 					return childCount > 0;
 				};
 				
-				// Returns the relative position of the given child
+				// 获取相对子图的坐标位置
 				function getRelativePosition(state, dx, dy)
+				
 				{
 					if (state != null)
 					{
@@ -118,11 +132,10 @@
 					return null;
 				};
 				
-				// Replaces translation for relative children
+				// 图移动/变换时对相对子图位置的更新
 				graph.translateCell = function(cell, dx, dy)
 				{
 					var rel = getRelativePosition(this.view.getState(cell), dx * graph.view.scale, dy * graph.view.scale);
-					
 					if (rel != null)
 					{
 						var geo = this.model.getGeometry(cell);
@@ -142,12 +155,13 @@
 					}
 				};
 				
-				// Replaces move preview for relative children
+				// 挂载的子图移动时 不超过父图区域
+				// this.cells - 数组 挂载到root下的图
+				// 这里this.cells[0] 是v1
 				graph.graphHandler.getDelta = function(me)
 				{
 					var point = mxUtils.convertPoint(this.graph.container, me.getX(), me.getY());
 					var delta = new mxPoint(point.x - this.first.x, point.y - this.first.y);
-					
 					if (this.cells != null && this.cells.length > 0 && this.cells[0] != null)
 					{
 						var state = this.graph.view.getState(this.cells[0]);
@@ -168,29 +182,30 @@
 					return delta;
 				};
 				
-				// Relative children cannot be removed from parent
+				// 子图是否跟随父图移动
+				// 这里返回false
 				graph.graphHandler.shouldRemoveCellsFromParent = function(parent, cells, evt)
 				{
 					return cells.length == 0 && !cells[0].geometry.relative && mxGraphHandler.prototype.shouldRemoveCellsFromParent.apply(this, arguments);
 				};
 				
-				// Enables moving of relative children
+				// 是否禁止图移动
 				graph.isCellLocked = function(cell)
 				{
 					return false;
 				};
 
-				// Enables rubberband selection
+				// 橡皮擦效果
 				new mxRubberband(graph);
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+			  // 获取图的默认根结点
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 开启事务
 				graph.getModel().beginUpdate();
 				try
 				{
+					// 插入V1的子图V2与V3 并设置相对于V1的相对位置
 					var v1 = graph.insertVertex(parent, null, 'Process', 60, 60, 90, 40);
 					var v2 = graph.insertVertex(v1, null, 'in', 0, 0.5, 20, 20, 'fontSize=9;shape=ellipse;resizable=0;');
 					v2.geometry.offset = new mxPoint(-10, -10);
@@ -201,7 +216,7 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 			}
@@ -209,12 +224,12 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
-
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+<body>
+	<div id="graphContainer"></div>
+	<script>
+		window.onload = function(){
+			main(document.getElementById('graphContainer'));
+		}
+	</script>
 </body>
 </html>
