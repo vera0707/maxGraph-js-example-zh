@@ -1,32 +1,36 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Collapse example for mxGraph. This example demonstrates changing
-  the style of a cell based on its collapsed state.
--->
 <html>
 <head>
+	<!-- mxGraph - 折叠  -->
 	<title>Collapse example for mxGraph</title>
+	<style>
+		#graphContainer{
+			position:relative;
+			overflow:hidden;
+			width:600px;
+			height:500px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+			margin: 50px auto;
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
+	<!-- 加载核心主文件 -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
+	<!-- 实例代码 -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
-		function main(container)
-		{
+		function main(container){
+			// 新建图层
 			var graph = new mxGraph(container);
+			// 获取图层根结点
 			var parent = graph.getDefaultParent();
 			
-			// Extends mxGraphModel.getStyle to show an image when collapsed
+			// 折叠是设置样式
 			var modelGetStyle = graph.model.getStyle;
 			graph.model.getStyle = function(cell)
 			{
@@ -34,8 +38,10 @@
 				{
 					var style = modelGetStyle.apply(this, arguments);
 					
+					// 如果折叠了
 					if (this.isCollapsed(cell))
 					{
+						// 折叠时显示git图 这里没有加载到。。。
 						style = style + ';shape=image;image=http://www.jgraph.com/images/mxgraph.gif;' +
 							'noLabel=1;imageBackground=#C3D9FF;imageBorder=#6482B9';
 					}
@@ -49,9 +55,12 @@
 			graph.getModel().beginUpdate();
 			try
 			{
-				var v1 = graph.insertVertex(parent, null, 'Container', 20, 20, 200, 200,
-					'shape=swimlane;startSize=20;');
+				// 图中插入swimlane类型的根结点
+				var v1 = graph.insertVertex(parent, null, 'Container', 20, 20, 200, 200,'shape=swimlane;startSize=20;');
+				// 设置隐藏时图形大小
 				v1.geometry.alternateBounds = new mxRectangle(0, 0, 110, 70);
+				// v1中插入子图形v11
+				// 存在子图形是V1左上角自动显示显隐图标
 				var v11 = graph.insertVertex(v1, null, 'Hello,', 10, 40, 120, 80);
 			}
 			finally
@@ -62,12 +71,12 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
-
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="position:relative;overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+<body>
+	<div id="graphContainer"></div>
+	<script>
+		window.onload =  function(){
+			main(document.getElementById('graphContainer'))
+		}
+	</script>
 </body>
 </html>
