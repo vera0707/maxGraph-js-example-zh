@@ -1,95 +1,91 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Dragsource example for mxGraph. This example demonstrates using
-  one drag source for multiple graphs and changing the drag icon.
--->
 <html>
 <head>
+	<!-- mxGraph - 拖拽 -->
 	<title>Dragsource example for mxGraph</title>
 
-	<!-- Sets the basepath for the library if not in same directory -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
 		function main()
 		{
-			// Checks if the browser is supported
-			if (!mxClient.isBrowserSupported())
-			{
-				// Displays an error message if the browser is not supported.
+			if (!mxClient.isBrowserSupported()){
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Enables guides
+				// 启动guide
+				// util - mxDragSource
 				mxGraphHandler.prototype.guidesEnabled = true;
 				
-			    // Alt disables guides
+			    // 关闭所有guide事件
+				  // 返回false	
 			    mxGuide.prototype.isEnabledForEvent = function(evt)
 			    {
 			    	return !mxEvent.isAltDown(evt);
 			    };
 				
-				// Enables snapping waypoints to terminals
+				// 启动移动路线自动捕获到对应图中
 				mxEdgeHandler.prototype.snapToTerminals = true;
 				
+				// 创建画布数组 存放多个画布容器
 				var graphs = [];
 				
-				// Creates the graph inside the given container
+				// 创建2个画布
 				for (var i = 0; i < 2; i++)
 				{
+					// 创建画布外容器
 					var container = document.createElement('div');
 					container.style.overflow = 'hidden';
-					container.style.position = 'relative';
+					container.style.positcion = 'relative';
 					container.style.width = '321px';
 					container.style.height = '241px';
+					container.style.marginBottom = '30px';
 					container.style.background = 'url(\'editors/images/grid.gif\')';
 					container.style.cursor = 'default';
 
 					document.body.appendChild(container);
 					
+					// 新建画布
 					var graph = new mxGraph(container);
-					graph.gridSize = 30;
+					// 画布网格颗粒大小
+					graph.gridSize = 10;
 					
 					// Uncomment the following if you want the container
 					// to fit the size of the graph
-					//graph.setResizeContainer(true);
+					// graph.setResizeContainer(true);
 					
-					// Enables rubberband selection
+					// 使用“橡皮筋”拖动效果
 					new mxRubberband(graph);
 					
-					// Gets the default parent for inserting new cells. This
-					// is normally the first child of the root (ie. layer 0).
+					
+					// 创建画布根结点
 					var parent = graph.getDefaultParent();
 									
-					// Adds cells to the model in a single step
+					// 开始事务
 					graph.getModel().beginUpdate();
 					try
 					{
+						// 创建V1结点
 						var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
+						// 创建V2结点
 						var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
+						// V1与V2连接
 						var e1 = graph.insertEdge(parent, null, '', v1, v2);
 					}
 					finally
 					{
-						// Updates the display
+						// 结束事务
 						graph.getModel().endUpdate();
 					}
 					
 					graphs.push(graph);
 				}
 				
-				// Returns the graph under the mouse
+				// 返回鼠标下的图形
 				var graphF = function(evt)
 				{
 					var x = mxEvent.getClientX(evt);
@@ -107,7 +103,7 @@
 					return null;
 				};
 				
-				// Inserts a cell at the given location
+				// 在当前位置插入图形
 				var funct = function(graph, evt, target, x, y)
 				{
 					var cell = new mxCell('Test', new mxGeometry(0, 0, 120, 40));
@@ -121,7 +117,7 @@
 					}
 				};
 				
-				// Creates a DOM node that acts as the drag source
+				// 画布外创建一个工具ICON 用来生成结点
 				var img = mxUtils.createImage('images/icons48/gear.png');
 				img.style.width = '48px';
 				img.style.height = '48px';
@@ -136,26 +132,22 @@
 					});
 				}
 				
-				// Creates the element that is being for the actual preview.
+				// 设置拖拽时产生的移动效果(拖动框)
 				var dragElt = document.createElement('div');
-				dragElt.style.border = 'dashed black 1px';
+				dragElt.style.border = 'dashed red 1px';
 				dragElt.style.width = '120px';
 				dragElt.style.height = '40px';
 				
-				// Drag source is configured to use dragElt for preview and as drag icon
-				// if scalePreview (last) argument is true. Dx and dy are null to force
-				// the use of the defaults. Note that dx and dy are only used for the
-				// drag icon but not for the preview.
+				// 最后一个参数设置为ture表示自定义拖动效果
 				var ds = mxUtils.makeDraggable(img, graphF, funct, dragElt, null, null, graph.autoscroll, true);
 				
-				// Redirects feature to global switch. Note that this feature should only be used
-				// if the the x and y arguments are used in funct to insert the cell.
+				// 将功能重定向到全局开关。 请注意，仅当在函数中使用x和y参数插入单元格时，才应使用此功能。
 				ds.isGuidesEnabled = function()
 				{
 					return graph.graphHandler.guidesEnabled;
 				};
 				
-				// Restores original drag icon while outside of graph
+				// 在图形外恢复原始拖动图标
 				ds.createDragElement = mxDragSource.prototype.createDragElement;
 			}
 		};
@@ -198,7 +190,11 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main();">
+<body>
+	<script>
+		window.onload = function(){
+			main();
+		}
+	</script>
 </body>
 </html>

@@ -1,25 +1,28 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Context icons example for mxGraph. This example demonstrates adding
-  icons to selected vertices to carry out special operations.
--->
 <html>
 <head>
+	<!-- mxGraph - 上下文图标 -->
 	<title>Context icons example for mxGraph</title>
+	<style>
+		#graphContainer{
+			overflow:hidden;
+			width:321px;
+			height:241px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
+	<!-- 加载核心主文件 -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
+	<!-- 示例代码 -->
 	<script type="text/javascript">
-		// Defines a subclass for mxVertexHandler that adds a set of clickable
-		// icons to every selected vertex.
+		// 复写mxVertexToolHandler 加可点击的icon 
 		function mxVertexToolHandler(state)
 		{
 			mxVertexHandler.apply(this, arguments);
@@ -34,15 +37,12 @@
 		{
 			mxVertexHandler.prototype.init.apply(this, arguments);
 
-			// In this example we force the use of DIVs for images in IE. This
-			// handles transparency in PNG images properly in IE and fixes the
-			// problem that IE routes all mouse events for a gesture via the
-			// initial IMG node, which means the target vertices 
+			// 使用IMG标签显示ICON来兼容IE浏览器
 			this.domNode = document.createElement('div');
 			this.domNode.style.position = 'absolute';
 			this.domNode.style.whiteSpace = 'nowrap';
 			
-			// Workaround for event redirection via image tag in quirks and IE8
+			// 创建IMG
 			function createImage(src)
 			{
 				if (mxClient.IS_IE && !mxClient.IS_SVG)
@@ -61,7 +61,7 @@
 				}
 			};
 
-			// Delete
+			// 删除ICON
 			var img = createImage('images/delete2.png');
 			img.setAttribute('title', 'Delete');
 			img.style.cursor = 'pointer';
@@ -70,10 +70,11 @@
 			mxEvent.addGestureListeners(img,
 				mxUtils.bind(this, function(evt)
 				{
-					// Disables dragging the image
+					// 禁止拖动ICON
 					mxEvent.consume(evt);
 				})
 			);
+			// 绑定点击事件 - 销毁图
 			mxEvent.addListener(img, 'click',
 				mxUtils.bind(this, function(evt)
 				{
@@ -83,7 +84,7 @@
 			);
 			this.domNode.appendChild(img);
 
-			// Size
+			// 尺寸ICON
 			var img = createImage('images/fit_to_size.png');
 			img.setAttribute('title', 'Resize');
 			img.style.cursor = 'se-resize';
@@ -100,7 +101,7 @@
 			);
 			this.domNode.appendChild(img);
 
-			// Move
+			// 移动ICON
 			var img = createImage('images/plus.png');
 			img.setAttribute('title', 'Move');
 			img.style.cursor = 'move';
@@ -119,7 +120,7 @@
 			);
 			this.domNode.appendChild(img);
 
-			// Connect
+			// 连接ICON
 			var img = createImage('images/check.png');
 			img.setAttribute('title', 'Connect');
 			img.style.cursor = 'pointer';
@@ -158,6 +159,7 @@
 			}
 		};
 		
+		// 销毁图
 		mxVertexToolHandler.prototype.destroy = function(sender, me)
 		{
 			mxVertexHandler.prototype.destroy.apply(this, arguments);
@@ -169,21 +171,20 @@
 			}
 		};
 		
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
+		// 启动函数
 		function main(container)
 		{
-			// Checks if the browser is supported
+			// 检查浏览器是否支持
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is not supported.
+				// 浏览器不支持时页面提醒
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Creates the graph inside the given container
+				// 在容器内新建图层
 				var graph = new mxGraph(container);
+				// 设置图是否允许建立新连接(是否允许用户建立连接线)
 				graph.setConnectable(true);
 				graph.connectionHandler.createTarget = true;
 
@@ -198,18 +199,16 @@
 					return mxGraph.prototype.createHandler.apply(this, arguments);
 				};
 
-				// Uncomment the following if you want the container
-				// to fit the size of the graph
+				// 设置图形适应容器大小
 				//graph.setResizeContainer(true);
 				
-				// Enables rubberband selection
+				// 启用『橡皮筋』选择效果
 				new mxRubberband(graph);
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取图形根结点
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 启动事务
 				graph.getModel().beginUpdate();
 				try
 				{
@@ -219,7 +218,7 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 			}
@@ -227,12 +226,11 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
 
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+<body>
+	<div id="graphContainer"></div>
+	<script>
+		main(document.getElementById('graphContainer'))
+	</script>
 </body>
 </html>

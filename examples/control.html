@@ -1,49 +1,52 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Control example for mxGraph. This example demonstrates adding
-  controls to specific cells in a graph.
--->
 <html>
 <head>
+	<!-- mxGraph - 控件 -->
 	<title>Control example for mxGraph</title>
+	<style>
+		#graphContainer{
+			overflow:hidden;
+			width:621px;
+			height:441px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<!-- 如果源码与项目不在一个路径下 设置mxBasePath   -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
+	<!-- 加载核心主文件 -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
+	<!-- 示例代码 -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
+		var graph;
 		function main(container)
 		{
-			// Checks if the browser is supported
+			// 检查浏览器是否支持
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is not supported.
+				// 浏览器不支持时页面提醒
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Creates the graph inside the given container
-				var graph = new mxGraph(container);
+				// 在容器内新建图层
+				graph = new mxGraph(container);
 				graph.setPanning(true);
 				
-				// Specifies the URL and size of the new control
+				// 创建删除ICON
 				var deleteImage = new mxImage('editors/images/overlays/forbidden.png', 16, 16);
 
-				// Overridden to add an additional control to the state at creation time
+				// 重建图像绘制方法 新加入删除ICON
 				mxCellRendererCreateControl = mxCellRenderer.prototype.createControl;
 				mxCellRenderer.prototype.createControl = function(state)
 				{
 					mxCellRendererCreateControl.apply(this, arguments);
 					
+					// 获取视图
 					var graph = state.view.graph;
 					
 					if (graph.getModel().isVertex(state.cell))
@@ -72,7 +75,7 @@
 					}
 				};
 				
-				// Helper function to compute the bounds of the control
+				// 计算控件边界
 				var getDeleteControlBounds = function(state)
 				{
 					if (state.deleteControl != null)
@@ -92,7 +95,7 @@
 					return null;
 				};
 				
-				// Overridden to update the scale and bounds of the control
+				// 更新控件的范围和边界
 				mxCellRendererRedrawControl = mxCellRenderer.prototype.redrawControl;
 				mxCellRenderer.prototype.redrawControl = function(state)
 				{
@@ -112,7 +115,7 @@
 					}
 				};
 				
-				// Overridden to remove the control if the state is destroyed
+				// 重新删除控件
 				mxCellRendererDestroy = mxCellRenderer.prototype.destroy;
 				mxCellRenderer.prototype.destroy = function(state)
 				{
@@ -125,18 +128,16 @@
 					}
 				};
 
-				// Uncomment the following if you want the container
-				// to fit the size of the graph
+				// 设置图形适应容器大小
 				//graph.setResizeContainer(true);
 				
-				// Enables rubberband selection
+				// 启用『橡皮筋』选择效果
 				new mxRubberband(graph);
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取图形根结点
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 启动事务
 				graph.getModel().beginUpdate();
 				try
 				{
@@ -146,32 +147,37 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 				
 				graph.centerZoom = false;
 				
-				document.body.appendChild(mxUtils.button('Zoom In', function()
-				{
-					graph.zoomIn();
-				}));
+				// 全局放大按钮
+				// document.body.appendChild(mxUtils.button('Zoom In', function()
+				// {
+				// 	graph.zoomIn();
+				// }));
 				
-				document.body.appendChild(mxUtils.button('Zoom Out', function()
-				{
-					graph.zoomOut();
-				}));
+				// 全局缩小按钮
+				// document.body.appendChild(mxUtils.button('Zoom Out', function()
+				// {
+				// 	graph.zoomOut();
+				// }));
 			}
 		};
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+<body>
 
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="overflow:hidden;width:621px;height:441px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+	<div id="graphContainer"></div>
+	<button onclick="graph.zoomIn()">放大</button>
+	<button onclick="graph.zoomOut()">缩小</button>
+	<script>
+		window.onload = function(){
+			main(document.getElementById('graphContainer'));
+		}
+	</script>
 </body>
 </html>
