@@ -1,53 +1,48 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Dynamic Style example for mxGraph. This example demonstrates changing
-  the style of a cell dynamically by overriding mxGraphModel.getStyle.
--->
+
 <html>
 <head>
+	<!-- 复写mxGraphModel样式  - mxGraph -->
 	<title>Dynamic Style example for mxGraph</title>
+	<style>
+		#graphContainer{
+			overflow:hidden;
+			width:321px;
+			height:241px;
+			background:url('editors/images/grid.gif')
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
 		function main(container)
 		{
-			// Checks if the browser is supported
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Creates the graph inside the given container
+				// 根据容器创建图
 				var graph = new mxGraph(container);
 
-				// Disables moving of edge labels in this examples
+				// 禁止移动边缘标签
 				graph.edgeLabelsMovable = false;
 				
-				// Enables rubberband selection
+				// 禁止橡皮擦效果
 				new mxRubberband(graph);
 
-				// Needs to set a flag to check for dynamic style changes,
-				// that is, changes to styles on cells where the style was
-				// not explicitely changed using mxStyleChange
+				// 指定更新样式属性为true
+				// 该值默认是false
+				// 若为true 顶层处理会自动更新
 				graph.getView().updateStyle = true;
 				
-				// Overrides mxGraphModel.getStyle to return a specific style
-				// for edges that reflects their target terminal (in this case
-				// the strokeColor will be equal to the target's fillColor).
+				// 重新样式
+				// 获取默认样式
 				var previous = graph.model.getStyle;
 				
 				graph.model.getStyle = function(cell)
@@ -56,6 +51,7 @@
 					{
 						var style = previous.apply(this, arguments);
 						
+						// 如果是连线
 						if (this.isEdge(cell))
 						{
 							var target = this.getTerminal(cell, false);
@@ -67,10 +63,11 @@
 								
 								if (fill != null)
 								{
+									// 将图的fill颜色 赋值给箭头
 									style += ';strokeColor='+fill;
 								}
 							}
-						}
+						} // 如果是图
 						else if (this.isVertex(cell))
 						{
 							var geometry = this.getGeometry(cell);
@@ -78,7 +75,7 @@
 							if (geometry != null &&
 								geometry.width > 80)
 							{
-								style += ';fillColor=green';
+								style += ';fillColor=orange';
 							}
 						}
 						
@@ -88,11 +85,10 @@
 					return null;
 				};
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取根节点
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 启动事务
 				graph.getModel().beginUpdate();
 				try
 				{
@@ -103,7 +99,7 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 			}
@@ -111,12 +107,13 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+<body>
 
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="overflow:hidden;width:321px;height:241px;background:url('editors/images/grid.gif')">
-	</div>
+	<div id="graphContainer"></div>
+	<script>
+		window.onload = function(){
+			main(document.getElementById('graphContainer'))
+		}
+	</script>
 </body>
 </html>

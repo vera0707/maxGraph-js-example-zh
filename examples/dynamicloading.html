@@ -1,55 +1,49 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Dynamic loading example for mxGraph. This example demonstrates loading
-  graph model data dynamically to limit the number of cells in the model.
--->
 <html>
 <head>
+	<!-- 动态加载 - mxGraph -->
 	<title>Dynamic loading example for mxGraph</title>
+	<style>
+		#graphContainer{
+			overflow:visible;
+			position:absolute;
+			width:100%;
+			height:100%;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+		}
+	</style>
 
-	<!-- Sets the basepath for the library if not in same directory -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
-		
-		// Global variable to make sure each cell in a response has
-		// a unique ID throughout the complete life of the program,
-		// in a real-life setup each cell should have an external
-		// ID on the business object or else the cell ID should be
-		// globally unique for the lifetime of the graph model.
+		// 全局变量，
+		// 以确保响应中的每个图在程序的整个生命周期中都具有唯一的ID。
+		// 在实际设置中，每个图在业务对象上都应具有外部ID（可以通过ID获取到该图）
+		// 该图的ID对于该画布应是全局唯一的
 		var requestId = 0;
 		
 		function main(container)
 		{
-			// Checks if browser is supported
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is
-				// not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Speedup the animation
-				mxText.prototype.enableBoundingBox = false;
+				// 启动加速动画
+				mxText.prototype.enableBoundingBox = true;
 				
-				// Creates the graph inside the given container
+				// 创建图像
 				var graph = new mxGraph(container);
 				
-				// Disables all built-in interactions
+				// 禁用所有内置交互(拖拽，移动等等)
 				graph.setEnabled(false);
 
-				// Handles clicks on cells
+				// 图的点击事件复写(指定load方法)
 				graph.addListener(mxEvent.CLICK, function(sender, evt)
 				{
 					var cell = evt.getProperty('cell');
@@ -60,56 +54,59 @@
 					}
 				});
 
-				// Changes the default vertex style in-place
+				// 更改结点样式
 				var style = graph.getStylesheet().getDefaultVertexStyle();
 				style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;
 				style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
 				style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
 								
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取默认根节点
 				var parent = graph.getDefaultParent();
 
+				// 获取中心位置坐标
 				var cx = graph.container.clientWidth / 2;
 				var cy = graph.container.clientHeight / 2;
 				
+				// 插入结点 居中放置
 				var cell = graph.insertVertex(parent, '0-0', '0-0', cx - 20, cy - 15, 60, 40);
 
-				// Animates the changes in the graph model
+				// 监听结点变化 开启变化过渡动画效果
 				graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt)
 				{
 					var changes = evt.getProperty('edit').changes;
 					mxEffects.animateChanges(graph, changes);
 				});
-
+				// 加载结点(除圆心以外)
 				load(graph, cell);
 			}
 		};
 
-		// Loads the links for the given cell into the given graph
-		// by requesting the respective data in the server-side
-		// (implemented for this demo using the server-function)
+		
+		// 模拟从服务端请求到数据 加载到页面中
 		function load(graph, cell)
 		{
+			// 如果cell是结点
 			if (graph.getModel().isVertex(cell))
 			{
+				// 获取居中位置坐标
 				var cx = graph.container.clientWidth / 2;
 				var cy = graph.container.clientHeight / 2;
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取默认根节点
 				var parent = graph.getDefaultParent();
 
-				// Adds cells to the model in a single step
+				// 监听事物
 				graph.getModel().beginUpdate();
 				try
 				{
+					// 从服务端获取xml格式的图
 					var xml = server(cell.id);
+					// 解析xml并解码
 					var doc = mxUtils.parseXml(xml);
 					var dec = new mxCodec(doc);
 					var model = dec.decode(doc.documentElement);
 
-					// Removes all cells which are not in the response
+					// 删除不再响应的单元格(销毁旧的图 创建新的图)
 					for (var key in graph.getModel().cells)
 					{
 						var tmp = graph.getModel().getCell(key);
@@ -117,14 +114,15 @@
 						if (tmp != cell &&
 							graph.getModel().isVertex(tmp))
 						{
+							// 删除图
 							graph.removeCells([tmp]);
 						}
 					}
 
-					// Merges the response model with the client model
+					// 将当前图数据与从服务端获取到的图结合到一起
 					graph.getModel().mergeChildren(model.getRoot().getChildAt(0), parent);
 
-					// Moves the given cell to the center
+					// 将给定单元格放到中心位置
 					var geo = graph.getModel().getGeometry(cell);
 
 					if (geo != null)
@@ -133,15 +131,17 @@
 						geo.x = cx - geo.width / 2;
 						geo.y = cy - geo.height / 2;
 
+						// 重置单元格样式(更改了位置坐标)
 						graph.getModel().setGeometry(cell, geo);
 					}
 
-					// Creates a list of the new vertices, if there is more
-					// than the center vertex which might have existed
-					// previously, then this needs to be changed to analyze
-					// the target model before calling mergeChildren above
+					// 创建一个新顶点的列表，
+					// 如果存在的顶点超过了先前可能存在的中心顶点，
+					// 那么在调用上面的mergeChildren之前，
+					// 需要对此进行更改以分析目标模型
 					var vertices = [];
 					
+					// 找到图下的所有图
 					for (var key in graph.getModel().cells)
 					{
 						var tmp = graph.getModel().getCell(key);
@@ -163,7 +163,7 @@
 						}
 					}
 					
-					// Arranges the response in a circle
+					// 将图排成一个圈
 					var cellCount = vertices.length;
 					var phi = 2 * Math.PI / cellCount;
 					var r = Math.min(graph.container.clientWidth / 4,
@@ -185,63 +185,66 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 			}
 		};
 
-		// Simulates the existence of a server that can crawl the
-		// big graph with a certain depth and create a graph model
-		// for the traversed cells, which is then sent to the client
+		// 该方法模拟服务器 向客户端发送数据
 		function server(cellId)
 		{
-			// Increments the request ID as a prefix for the cell IDs
+			// 自增，作为图的外部ID
 			requestId++;
 
-			// Creates a local graph with no display
+			// 创建一个隐藏的临时图
 			var graph = new mxGraph();
 			
-			// Gets the default parent for inserting new cells. This
-			// is normally the first child of the root (ie. layer 0).
+			// 创建临时图的根结点
 			var parent = graph.getDefaultParent();
 
-			// Adds cells to the model in a single step
+			// 启用事务
 			graph.getModel().beginUpdate();
 			try
 			{
+				// 创建与ID为cellId的图(与传进来的中心图重叠为一个)
 				var v0 = graph.insertVertex(parent, cellId, 'Dummy', 0, 0, 60, 40);
+				// 创建随机数量的图
 				var cellCount = parseInt(Math.random() * 16) + 4;
 
-				// Creates the random links and cells for the response
+				// 创建图与连接点
 				for (var i = 0; i < cellCount; i++)
 				{
 					var id = requestId + '-' + i;
+					// 插入新增结点
 					var v = graph.insertVertex(parent, id, id, 0, 0, 60, 40);
+					// 增加连接线
 					var e = graph.insertEdge(parent, null, 'Link ' + i, v0, v);
 				}
 			}
 			finally
 			{
-				// Updates the display
+				// 结束事务
 				graph.getModel().endUpdate();
 			}
 
+			// 编码临时图
 			var enc = new mxCodec();
 			var node = enc.encode(graph.getModel());
 			
+			// 将图信息转为XML格式
 			return mxUtils.getXml(node);
 		};
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))" style="overflow:hidden;">
+<body style="overflow:hidden;">
 
-	<!-- Creates a container for the graph with a grid wallpaper. Make sure to define the position
-		and overflow attributes! See comments on the adding of the size-listener on line 54 ff!  -->
-	<div id="graphContainer"
-		style="overflow:visible;position:absolute;width:100%;height:100%;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+	<div id="graphContainer"></div>
+	<script>
+		window.onload = function(){
+			main(document.getElementById('graphContainer'));
+		}
+	</script>
 </body>
 </html>
