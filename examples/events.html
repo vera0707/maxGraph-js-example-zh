@@ -1,44 +1,27 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Events example for mxGraph. This example demonstrates creating
-  a graph container and using the mxDivResizer to update the size,
-  interaction on the graph, including marquee selection, custom 
-  tooltips, context menu handling and changing the default menu
-  opacity. It also demonstrates how to use an edgestyle in the 
-  default stylesheet, and handle the doubleclick on the adjustment
-  point. See also: overlays.html for click event handling.
--->
 <html>
 <head>
+	<!-- 自定义右键菜单  - mxGraph-->
 	<title>Events example for mxGraph</title>
 
-	<!-- Sets the basepath for the library if not in same directory -->
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the dynamically
-		// created DOM node called container which is created below.
 		function main()
 		{
-			// Sets the image to be used for creating new connections
+			// 图形中间重置显示icon
 			mxConnectionHandler.prototype.connectImage = new mxImage('images/green-dot.gif', 14, 14);
 			
-			// Checks if browser is supported
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is
-				// not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
+				// 创建图的外容器
 				var container = document.createElement('div');
 				container.style.position = 'absolute';
 				container.style.overflow = 'hidden';
@@ -48,10 +31,10 @@
 				container.style.bottom = '0px';
 				container.style.background = 'url("editors/images/grid.gif")';
 
-				// Disables built-in context menu
+				// 禁止右键菜单
 				mxEvent.disableContextMenu(container);
 
-				// Workaround for Internet Explorer ignoring certain styles
+				// 兼容IE
 				if (mxClient.IS_QUIRKS)
 				{
 					document.body.style.overflow = 'hidden';
@@ -59,21 +42,20 @@
 				}
 
 				document.body.appendChild(container);
-			
-				// Creates the graph inside the DOM node.
-				// Optionally you can enable panning, tooltips and connections
-				// using graph.setPanning(), setTooltips() & setConnectable().
-				// To enable rubberband selection and basic keyboard events,
-				// use new mxRubberband(graph) and new mxKeyHandler(graph).
+
+				// 新建图
 				var graph = new mxGraph(container);
 
-				// Enables tooltips, new connections and panning
+				// 启动平移
 				graph.setPanning(true);
+				// 启动工具提示	
 				graph.setTooltips(true);
+				// 可加连接线
 				graph.setConnectable(true);
 				
-				// Automatically handle parallel edges
+				// 设置布局 自动处理平行边
  				var layout = new mxParallelEdgeLayout(graph);
+				// 布局管理器，该管理器在对图形进行任何更改后运行给定的布局
  				var layoutMgr = new mxLayoutManager(graph);
  				
  				layoutMgr.getLayout = function(cell)
@@ -84,42 +66,39 @@
 					}
 				};
 				
-				// Enables rubberband (marquee) selection and a handler
-				// for basic keystrokes (eg. return, escape during editing).
+				// 启用橡皮筋（选取框）选择和处理程序
+        // 基本的键盘操作（例如，在编辑过程中返回，转义）。
 				var rubberband = new mxRubberband(graph);
 				var keyHandler = new mxKeyHandler(graph);
 
-				// Changes the default style for edges "in-place" and assigns
-				// an alternate edge style which is applied in mxGraph.flip
-				// when the user double clicks on the adjustment control point
-				// of the edge. The ElbowConnector edge style switches to TopToBottom
-				// if the horizontal style is true.
+				// 改变线段连接样式
 				var style = graph.getStylesheet().getDefaultEdgeStyle();
+				// 连接线转弯处设置为弧度
 				style[mxConstants.STYLE_ROUNDED] = true;
 				style[mxConstants.STYLE_EDGE] = mxEdgeStyle.ElbowConnector;
 		
 				graph.alternateEdgeStyle = 'elbow=vertical';
 
-				// Installs a custom tooltip for cells
+				// 为单元格安装自定义工具提示
 				graph.getTooltipForCell = function(cell)
 				{
 					return 'Doubleclick and right- or shiftclick';
 				}
 				
-				// Installs a popupmenu handler using local function (see below).
+				// 设置自定义右键功能菜单
 				graph.popupMenuHandler.factoryMethod = function(menu, cell, evt)
 				{
 					return createPopupMenu(graph, menu, cell, evt);
 				};
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取图的根元素
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 启动事务
 				graph.getModel().beginUpdate();
 				try
 				{
+					// 创建3个图 2条连线
 					var v1 = graph.insertVertex(parent, null, 'Doubleclick', 20, 20, 80, 30);
 					var v2 = graph.insertVertex(parent, null, 'Right-/Shiftclick', 200, 150, 120, 30);
 					var v3 = graph.insertVertex(parent, null, 'Connect/Reconnect', 200, 20, 120, 30);
@@ -129,19 +108,20 @@
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 			}
 		};
 		
-		// Function to create the entries in the popupmenu
+		// 创建右键菜单栏
 		function createPopupMenu(graph, menu, cell, evt)
 		{
 			if (cell != null)
 			{
 				menu.addItem('Cell Item', 'editors/images/image.gif', function()
 				{
+					// 执行点击事件
 					mxUtils.alert('MenuItem1');
 				});
 			}
@@ -149,6 +129,7 @@
 			{
 				menu.addItem('No-Cell Item', 'editors/images/image.gif', function()
 				{
+					// 执行点击事件
 					mxUtils.alert('MenuItem2');
 				});
 			}
@@ -161,7 +142,12 @@
 	</script>
 </head>
 
-<!-- Calls the main function after the page has loaded. Container is dynamically created. -->
-<body onload="main();">
+<body>
+
+	<script>
+		window.onload = function(){
+			main();
+		}
+	</script>
 </body>
 </html>
