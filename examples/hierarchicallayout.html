@@ -51,9 +51,9 @@
 				style = graph.getStylesheet().getDefaultEdgeStyle();
 				style[mxConstants.STYLE_ROUNDED] = true;
 
-				// Creates a layout algorithm to be used
-				// with the graph
+				// 使用水平布局算法
 				var layout = new mxHierarchicalLayout(graph);
+				// 使用常规布局算法
 				var organic = new mxFastOrganicLayout(graph);
 				organic.forceConstant = 120;
 				
@@ -64,6 +64,7 @@
 				mxUtils.write(button, 'Hierarchical');
 				mxEvent.addListener(button, 'click', function(evt)
 				{
+          // 触发水平布局
 					layout.execute(parent);
 				});
 				document.body.appendChild(button);
@@ -74,6 +75,7 @@
 				
 				mxEvent.addListener(button, 'click', function(evt)
 				{
+					// 触发普通布局
 					organic.execute(parent);
 				});
 				

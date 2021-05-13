@@ -18,8 +18,8 @@
 
 	<!-- Example code -->
 	<script type="text/javascript">
-		// Defines an icon for creating new connections in the connection handler.
-		// This will automatically disable the highlighting of the source vertex.
+
+		// 图形中间的连接线图标
 		mxConnectionHandler.prototype.connectImage = new mxImage('images/connector.gif', 16, 16);
 		
 		// Defines a new class for all icons
@@ -28,7 +28,7 @@
 			this.images = [];
 			var graph = state.view.graph;
 			
-			// Icon1
+			// 复制图形的图标
 			var img = mxUtils.createImage('images/copy.png');
 			img.setAttribute('title', 'Duplicate');
 			img.style.position = 'absolute';
@@ -42,7 +42,9 @@
 				mxUtils.bind(this, function(evt)
 				{
 					var s = graph.gridSize;
+					// 画布设置选中图形(复制图)
 					graph.setSelectionCells(graph.moveCells([state.cell], s, s, true));
+					// 禁止拖动图标
 					mxEvent.consume(evt);
 					this.destroy();
 				})
@@ -51,7 +53,7 @@
 			state.view.graph.container.appendChild(img);
 			this.images.push(img);
 			
-			// Delete
+			// 删除图形的图标
 			var img = mxUtils.createImage('images/delete2.png');
 			img.setAttribute('title', 'Delete');
 			img.style.position = 'absolute';
@@ -64,7 +66,7 @@
 			mxEvent.addGestureListeners(img,
 				mxUtils.bind(this, function(evt)
 				{
-					// Disables dragging the image
+					// 禁止拖动图标
 					mxEvent.consume(evt);
 				})
 			);
@@ -72,6 +74,7 @@
 			mxEvent.addListener(img, 'click',
 				mxUtils.bind(this, function(evt)
 				{
+					// 在画布中销毁该图
 					graph.removeCells([state.cell]);
 					mxEvent.consume(evt);
 					this.destroy();

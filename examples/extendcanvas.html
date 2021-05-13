@@ -1,56 +1,50 @@
-<!--
-  Copyright (c) 2006-2013, JGraph Ltd
-  
-  Extend canvas example for mxGraph. This example demonstrates implementing
-  an infinite canvas with scrollbars.
--->
 <html>
 <head>
+	<!-- 利用滚动条实现画布无限延伸 -->
 	<title>Extend canvas example for mxGraph</title>
 
-	<!-- Sets the basepath for the library if not in same directory -->
+	<style>
+		#graphContainer{
+			position:relative;
+			overflow:auto;
+			width:321px;
+			height:241px;
+			background:url('editors/images/grid.gif');
+			cursor:default;
+		}
+	</style>
+
 	<script type="text/javascript">
 		mxBasePath = '../src';
 	</script>
 
-	<!-- Loads and initializes the library -->
 	<script type="text/javascript" src="../src/js/mxClient.js"></script>
 
-	<!-- Example code -->
 	<script type="text/javascript">
-		// Program starts here. Creates a sample graph in the
-		// DOM node with the specified ID. This function is invoked
-		// from the onLoad event handler of the document (see below).
 		function main(container)
 		{
-			// Checks if the browser is supported
 			if (!mxClient.isBrowserSupported())
 			{
-				// Displays an error message if the browser is not supported.
 				mxUtils.error('Browser is not supported!', 200, false);
 			}
 			else
 			{
-				// Disables the built-in context menu
+				// 禁止右键菜单
 				mxEvent.disableContextMenu(container);
 				
-				// Creates the graph inside the given container
+				// 创建图
 				var graph = new mxGraph(container);
+				// 忽略图形的独立平移
 				graph.panningHandler.ignoreCell = true;
+				// 允许设置平移
 				graph.setPanning(true);
 				
-				/**
-				 * Specifies the size of the size for "tiles" to be used for a graph with
-				 * scrollbars but no visible background page. A good value is large
-				 * enough to reduce the number of repaints that is caused for auto-
-				 * translation, which depends on this value, and small enough to give
-				 * a small empty buffer around the graph. Default is 400x400.
-				 */
+				
+				// 设置具有滚动条但无可见背景页面的图形
+			  // 该区域大小400*400
 				graph.scrollTileSize = new mxRectangle(0, 0, 400, 400);
 				
-				/**
-				 * Returns the padding for pages in page view with scrollbars.
-				 */
+				// 使用滚动条返回页面视图中页面的填充
 				graph.getPagePadding = function()
 				{
 					return new mxPoint(Math.max(0, Math.round(graph.container.offsetWidth - 34)),
@@ -58,7 +52,7 @@
 				};
 				
 				/**
-				 * Returns the size of the page format scaled with the page size.
+				 * 返回随页面大小缩放的页面格式的大小
 				 */
 				graph.getPageSize = function()
 				{
@@ -66,12 +60,10 @@
 							this.pageFormat.height * this.pageScale) : this.scrollTileSize;
 				};
 				
-				/**
-				 * Returns a rectangle describing the position and count of the
-				 * background pages, where x and y are the position of the top,
-				 * left page and width and height are the vertical and horizontal
-				 * page count.
-				 */
+				// 返回一个矩形，
+				// 该矩形描述背景页面的位置和数量，
+				// 其中x和y是顶部页面的位置，左侧页面的位置，
+				// 宽度和高度是垂直页面和水平页面的数量
 				graph.getPageLayout = function()
 				{
 					var size = (this.pageVisible) ? this.getPageSize() : this.scrollTileSize;
@@ -83,7 +75,7 @@
 					}
 					else
 					{
-						// Computes untransformed graph bounds
+						// 计算未变换的图范围
 						var x = Math.ceil(bounds.x / this.view.scale - this.view.translate.x);
 						var y = Math.ceil(bounds.y / this.view.scale - this.view.translate.y);
 						var w = Math.floor(bounds.width / this.view.scale);
@@ -98,7 +90,7 @@
 					}
 				};
 
-				// Fits the number of background pages to the graph
+				// 使背景页面数适合图表
 				graph.view.getBackgroundPageBounds = function()
 				{
 					var layout = this.graph.getPageLayout();
@@ -192,30 +184,31 @@
 					}
 				};
 
-				// Enables rubberband selection
+				// 启用『橡皮筋』选择效果
 				new mxRubberband(graph);
 				
-				// Gets the default parent for inserting new cells. This
-				// is normally the first child of the root (ie. layer 0).
+				// 获取图根元素
 				var parent = graph.getDefaultParent();
 								
-				// Adds cells to the model in a single step
+				// 启动事务
 				graph.getModel().beginUpdate();
 				try
 				{
+					// 插入默认图形与连接线
 					var v1 = graph.insertVertex(parent, null, 'Hello,', 20, 20, 80, 30);
 					var v2 = graph.insertVertex(parent, null, 'World!', 200, 150, 80, 30);
 					var e1 = graph.insertEdge(parent, null, '', v1, v2);
 				}
 				finally
 				{
-					// Updates the display
+					// 结束事务
 					graph.getModel().endUpdate();
 				}
 				
-				// Sets initial scrollbar positions
+				// DOM挂载后执行
 				window.setTimeout(function()
 				{
+					// 设置图的滚动高度
 					var bounds = graph.getGraphBounds();
 					var width = Math.max(bounds.width, graph.scrollTileSize.width * graph.view.scale);
 					var height = Math.max(bounds.height, graph.scrollTileSize.height * graph.view.scale);
@@ -227,12 +220,14 @@
 	</script>
 </head>
 
-<!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+<body>
 
-	<!-- Creates a container for the graph with a grid wallpaper -->
-	<div id="graphContainer"
-		style="position:relative;overflow:auto;width:321px;height:241px;background:url('editors/images/grid.gif');cursor:default;">
-	</div>
+	<div id="graphContainer"></div>
+
+	<script>
+		window.onload = function() {
+			main(document.getElementById('graphContainer'));
+		}
+	</script>
 </body>
 </html>

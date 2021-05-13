@@ -101,6 +101,7 @@
 				var button = mxUtils.button('View XML', function()
 				{
 					var encoder = new mxCodec();
+					// 获取图的XML格式代码片段
 					var node = encoder.encode(graph.getModel());
 					mxUtils.popup(mxUtils.getPrettyXml(node), true);
 				});

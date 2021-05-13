@@ -43,10 +43,10 @@
 			    	return !mxEvent.isAltDown(me.getEvent());
 			    };
 			    
-			    // Defines the guides to be red (default)
-				mxConstants.GUIDE_COLOR = '#FF0000';
+			    // 连接线移动时引导框颜色
+				mxConstants.GUIDE_COLOR = 'red';
 			    
-			    // Defines the guides to be 1 pixel (default)
+			    // 连接线移动时引导框宽度
 				mxConstants.GUIDE_STROKEWIDTH = 1;
 				
 				// Enables snapping waypoints to terminals
@@ -121,7 +121,7 @@
 				// Transfer initial focus to graph container for keystroke handling
 				graph.container.focus();
 				    
-			    // Handles keystroke events
+			    // 监听键盘事件
 			    var keyHandler = new mxKeyHandler(graph);
 			    
 			    // Ignores enter keystroke. Remove this line if you want the

@@ -65,8 +65,8 @@
 				// is normally the first child of the root (ie. layer 0).
 				var parent = graph.getDefaultParent();
 
-				// Creates a layout algorithm to be used
-				// with the graph
+			
+				// 图的快速布局 不限定布局计算方式
 				var layout = new mxFastOrganicLayout(graph);
 
 				// Moves stuff wider apart than usual
@@ -82,8 +82,7 @@
 						graph.getModel().beginUpdate();
 						try
 						{
-							// Creates a layout algorithm to be used
-							// with the graph
+							// 创建一个环状的布局
 							var circleLayout = new mxCircleLayout(graph);
 							circleLayout.execute(parent);
 						}
